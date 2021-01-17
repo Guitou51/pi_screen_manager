@@ -48,8 +48,7 @@ class DayNightCycle:
             return PeriodDay.NIGHT
 
     def is_day(self, current_time: time) -> bool:
-        dt = datetime.combine(date.today(), self.night_time) - self.one_second
-        return self.day_time < current_time < dt.time()
+        return self.period_day(current_time) == PeriodDay.DAY
 
     def __del__(self):
         self.sunrise.on_completed()

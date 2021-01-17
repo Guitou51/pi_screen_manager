@@ -25,9 +25,10 @@ backlight = Backlight()
 
 
 def save_brightness_changed(brightness):
-    if day_night_cycle.is_day(datetime.now().time()):
+    period_day = day_night_cycle.period_day(datetime.now().time())
+    if period_day == PeriodDay.DAY:
         config.data.brightness_day = brightness
-    else:
+    elif period_day == PeriodDay.EVENING:
         config.data.brightness_night = brightness
     config.write()
 
