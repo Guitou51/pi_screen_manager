@@ -13,7 +13,6 @@ class BrightnessManager(Observer):
     def __init__(self, backlight: Backlight):
         self.backlight = backlight
         self.brightness_changed = Subject()
-        pass
 
     def on_next(self, value: List) -> None:
         if len(value) > 1:
@@ -22,17 +21,25 @@ class BrightnessManager(Observer):
             if 0 <= diff___ <= 100:
                 self.backlight.brightness = diff___
                 self.logger.debug("brightness: %s", self.backlight.brightness)
-        pass
 
     def on_error(self, error: Exception) -> None:
-        pass
+        self.logger.error("error",exc_info=error)
 
     def on_completed(self) -> None:
         self.brightness_changed.on_next(self.backlight.brightness)
-        pass
 
-    def brightness(self, value):
+    def set_brightness(self, value):
+        self.backlight.power = True
+        self.logger.debug("set brightness %s", value)
         self.backlight.brightness = value
+
+    def power_off(self):
+        self.logger.debug("power off")
+        self.backlight.power = False
+
+    def power_on(self):
+        self.logger.debug("power on")
+        self.backlight.power = True
 
     def __del__(self):
         self.brightness_changed.on_completed()
