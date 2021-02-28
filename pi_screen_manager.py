@@ -6,9 +6,11 @@ import schedule
 from ft5406 import Touchscreen, TS_PRESS, TS_RELEASE, TS_MOVE, Touch
 from rpi_backlight import Backlight
 
-from brightness_manager import BrightnessManager
+from brightness_screen_manager import BrightnessScreenManager
 from config import Config
 from day_night_cycle import DayNightCycle, PeriodDay
+from light_sensor import LightSensor
+from luminosity_manager import LuminosityManager
 from touch_manager import TouchManager
 
 logging.basicConfig(level=logging.DEBUG)
@@ -33,23 +35,16 @@ def save_brightness_changed(brightness):
     config.write()
 
 
-brightness_manager = BrightnessManager(backlight)
-brightness_manager.brightness_changed.subscribe(on_next=save_brightness_changed)
-
 day_night_cycle = DayNightCycle()
 
-if day_night_cycle.period_day(datetime.now().time()) == PeriodDay.DAY:
-    logger.debug("is day set brightness %s", config.data.brightness_day)
-    brightness_manager.set_brightness(config.data.brightness_day)
-elif day_night_cycle.period_day(datetime.now().time()) == PeriodDay.EVENING:
-    logger.debug("is evening set brightness %s", config.data.brightness_night)
-    brightness_manager.set_brightness(config.data.brightness_night)
-else:
+brightness_manager = BrightnessScreenManager(backlight)
+brightness_manager.brightness_changed.subscribe(on_next=save_brightness_changed)
+lum_man = LuminosityManager(LightSensor(), brightness_manager, day_night_cycle)
+
+if day_night_cycle.period_day(datetime.now().time()) == PeriodDay.NIGHT:
     logger.debug("is night set power off screen")
     brightness_manager.power_off()
 
-day_night_cycle.sunset.subscribe(on_next=lambda x: brightness_manager.set_brightness(config.data.brightness_night))
-day_night_cycle.sunrise.subscribe(on_next=lambda x: brightness_manager.set_brightness(config.data.brightness_day))
 day_night_cycle.night.subscribe(on_next=lambda x: brightness_manager.power_off())
 
 touch_manager = TouchManager(brightness_manager)

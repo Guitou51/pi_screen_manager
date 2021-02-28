@@ -6,7 +6,7 @@ from rx.core.typing import Observer
 from rx.subject import Subject
 
 
-class BrightnessManager(Observer):
+class BrightnessScreenManager(Observer):
     brightness_changed: Subject
     logger = logging.getLogger("BrightnessManager")
 
@@ -23,7 +23,7 @@ class BrightnessManager(Observer):
                 self.logger.debug("brightness: %s", self.backlight.brightness)
 
     def on_error(self, error: Exception) -> None:
-        self.logger.error("error",exc_info=error)
+        self.logger.error("error", exc_info=error)
 
     def on_completed(self) -> None:
         self.brightness_changed.on_next(self.backlight.brightness)

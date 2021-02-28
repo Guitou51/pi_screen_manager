@@ -4,7 +4,7 @@ from ft5406 import Touch
 from rx import operators
 from rx.subject import Subject
 
-from brightness_manager import BrightnessManager
+from brightness_screen_manager import BrightnessScreenManager
 
 
 class TouchManager:
@@ -14,8 +14,7 @@ class TouchManager:
     is_started = {}
     a = []
 
-
-    def __init__(self, brightness_manager: BrightnessManager):
+    def __init__(self, brightness_manager: BrightnessScreenManager):
         self.brightness_manager = brightness_manager
 
     def start(self, _id):
@@ -23,13 +22,11 @@ class TouchManager:
             self.is_started[_id] = False
 
         if not self.is_started[_id]:
-
             self.the_subject[_id] = Subject()
 
             def accumulator(acc, x):
                 acc.append(x)
                 return acc
-
 
             self.the_subject[_id].pipe(operators.map(lambda p: (p.x, p.y)),
                                        operators.scan(accumulator, seed=[])).subscribe(self.brightness_manager)
@@ -46,4 +43,3 @@ class TouchManager:
         if _id in self.the_subject:
             self.the_subject[_id].on_completed()
             del self.the_subject[_id]
-
